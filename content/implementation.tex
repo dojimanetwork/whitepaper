@@ -1,0 +1,36 @@
+\section{Implementation}
+
+To ensure the robustness and scalability of our omnichain architecture, we have set up a comprehensive testing environment using Docker, which incorporates key modules for the system’s components. These modules include Universal Layer 1, Hermes, Crawler, Narada, Operator, and the Operator Gateway Server. Each of these modules plays a critical role in the operation and validation of cross-chain transactions within the omnichain environment.
+
+\begin{itemize}
+    \item Universal Layer 1: Serving as the L1 for shared omni roll-ups, Universal Layer 1 is an EVM-compatible chain utilizing the DOJ native token and Dojima-specific contracts. It provides a secure and decentralized base layer for shared roll-ups, ensuring that cross-chain transactions can be validated and processed effectively.
+  
+    \item Hermes: A Cosmos SDK-based chain, Hermes functions as a bridge to connect Universal Layer 1 with other blockchain ecosystems. It is responsible for maintaining validators and liquidity between chains, acting as a critical connector for inter-chain transactions.
+
+    \item Narada: This module maintains a suite of L1 clients, including Ethereum, Solana, Polkadot, and others, enabling Hermes to interact with a variety of blockchain networks. Narada currently supports GG20 TSS (Threshold Signature Scheme) and is in the process of integrating dynamic TSS based on the cggmp protocol, enhancing the security and flexibility of cross-chain interactions.
+
+    \item Crawler: The Crawler module manages the list of registered operators and is responsible for establishing connections with different L1 chains via the Operator Gateway. It plays an essential role in the connectivity of the system.
+
+    \item Operator: The Operator module runs nodes on various L1 chains and interfaces with the gateway server. It ensures that the interactions with different blockchains are seamless and secure, processing transactions and forwarding them as needed.
+
+    \item Operator Gateway Server: The Gateway Server connects crawlers to operators, ensuring smooth data flow and operational integrity across different parts of the system.
+\end{itemize}
+
+
+For our testing purposes, we are utilizing Nitro-Espresso integration to test the Arbitrum Nitro roll-up with the Espresso sequencer, facilitating cross-chain transactions between Ethereum and omni version of Arbitrun Nitro rollup through our Universal L1. This provides us with a controlled environment to simulate real-world transactions and measure performance under various conditions.
+
+The following system configurations are required to run the testing environment:
+
+- Hermes: 8 GB RAM, 1 TB storage, 2 CPUs
+
+- Narada: 2 CPUs, 2 GB RAM
+
+- Crawler: 1 GB RAM, 1 CPU
+
+- Universal Layer 1: 8 GB RAM, 2 CPUs, 1 TB storage
+
+\textbf{Future Testing Plans}
+
+We are in the process of scaling the system testing by dynamically adjusting the number of validators and processing a higher volume of input transactions. This will help ensure that the system can handle increased traffic and maintain its performance and security at larger scales. The goal is to continue refining the infrastructure and identify any potential bottlenecks that may arise in a production environment.
+
+By continuously testing and improving the modules of the system and their interactions, our objective is to provide a robust, secure, and scalable omnichain architecture that meets the needs of decentralized applications and companies seeking to integrate Web3 technologies.

@@ -1,0 +1,61 @@
+
+\section{Settlement Workflow}
+
+In an omnichain ecosystem, transactions span across multiple blockchains, often requiring complex workflows to ensure correctness, security, and finality. Here is a breakdown of how the settlement process works, detailing the pre-confirmation, final confirmation, rollback mechanism, and error handling.
+
+\textbf{Transaction Initiation}
+\begin{itemize}
+    \item Solver Network Transactions: Transactions initiated through solver networks involve multiple solvers that analyze the transaction request and select the most efficient path to execute it, often utilizing cross-chain bridges, microchains, or direct blockchain protocols.
+    \item Omni-Rollup Transactions: For omni-rollup transactions, solvers bundle transactions, forward them to the Omni Sequencer, and submit them to the appropriate rollups for execution.
+\end{itemize}
+
+
+\textbf{Pre-Confirmation} 
+\begin{itemize}
+    \item Solver Network Transactions: The solver network begins by verifying inputs and ensuring that all dependencies are satisfied. For multi-chain transactions, solvers assess execution feasibility across involved blockchains, guaranteeing atomicity through commit/rollback mechanisms. During pre-confirmation, users receive real-time status updates, providing visibility into transaction progress and potential issues. Cryptographic signatures and proofs are validated to ensure authenticity and data integrity.
+  
+    \item Omni-Rollup Transactions: The Omni Sequencer processes the bundled transaction and begins the preconfirmation phase by verifying its feasibility within the rollup's context. It ensures that all participating rollups have adequate resources and that the transaction's data integrity remains intact. Once validated, a pre-confirmation status is sent to the user, indicating the transaction's readiness for final confirmation.
+\end{itemize}
+
+
+
+\textbf{Final Confirmation} 
+\begin{itemize}
+    \item Solver Network Transactions: After a successful preconfirmation, the solver network initiates transaction execution. For cross-chain transactions, solvers coordinate inter-chain dependencies and trigger the necessary operations, such as fund transfers or contract executions. Upon successful execution, the solvers update the final status of the transaction, confirming its completion, and submitting it to the appropriate blockchain or microchain. The final transaction state is then recorded on the respective blockchain, ensuring transparency and immutability.
+    
+    \item Omni-Rollup Transactions: Upon receiving pre-confirmation from all involved rollups, the Omni Sequencer issues the final confirmation to proceed with execution. It then submits the transaction to the respective rollup chains, where execution takes place. Once the transaction is successfully processed within each rollup, the final state is committed and synchronized across all rollups. Users receive final confirmation updates, ensuring transparency and verifying the successful completion of the omni-rollup transaction.
+\end{itemize}
+
+
+\textbf{Rollback Mechanism}
+
+Rollback mechanisms are essential for ensuring that a transaction does not leave the system in an inconsistent or partially completed state in the event of failure. Rollback can happen after preconfirmation and before final settlement, but cannot happen after final settlement. 
+
+The principle of atomicity ensures that all actions involved in the transaction are executed as a single, indivisible operation. If any part of the transaction fails, the entire transaction is rolled back.
+
+\textbf{Two-Phase Commitment Protocol (2PC)~\cite{2pc}}:
+
+\begin{itemize}
+    \item Phase 1 - Locking Resources: In this phase, each participant in the transaction locks the assets they are going to send. These locks are usually time-bound, and the resources are held until the transaction is successfully committed or rolled back.
+    \item Phase 2 - Finalizing or Rolling Back: Once all parties have confirmed that they are ready, the transaction is finalized. If any party fails to confirm or encounters an issue, the transaction is rolled back, and the locked assets are released or returned.
+\end{itemize}
+    
+\begin{itemize}
+    \item Solver Network Transactions: For each atomic transaction, a solver client verifies the successful locking of assets from all participating rollups. If asset locking on all participating rollups is successful within the specified time frame, the client commits to final execution and notifies all participating rollups accordingly. However, if the client fails to confirm successful asset locking on either rollup, it triggers a rollback, ensuring that all locked assets are released, thereby maintaining transaction atomicity.
+
+    \item Omni-Rollup Transactions: For omni-rollup transactions, the rollback mechanism is managed by the rollup client. The source rollup client monitors the successful locking of assets across all participating rollups. If asset locking is confirmed on all rollups within the specified time frame, the client commits to final execution and notifies all participating rollups accordingly. However, if the client fails to confirm successful asset locking on any rollup, it triggers a rollback, ensuring that all locked assets are released, thereby preserving transaction atomicity.
+\end{itemize}
+
+
+\textbf{Error Handling}
+
+Effective error handling ensures that any issues encountered during the transaction lifecycle are swiftly detected and managed.
+\begin{itemize}
+    \item Solver Network Transactions: During pre-confirmation, if input dependencies or feasibility checks fail, the solver network raises an error and notifies users with a detailed message explaining the cause. If an error occurs during execution (e.g., insufficient balance, contract failure), the transaction is halted, and the solver network initiates a rollback to maintain consistency. All errors are logged, and users receive real-time feedback. In cases of temporary failures, such as network congestion or brief outages, the system automatically retries the transaction to ensure successful completion.
+
+    \item Omni-Rollup Transactions: If an omni-rollup transaction fails after pre-confirmation but before execution, the system automatically initiates a rollback across all affected rollups to maintain consistency. In the event of an execution failure, the Omni Sequencer handles the error by issuing a "transaction failed" status. Depending on the nature of the error, the transaction may be re-tried automatically, or users may be prompted to re-submit it. If rollback is not feasible due to an irrecoverable issue (e.g., a protocol bug or chain divergence), the system generates a detailed error message and suggests potential recovery options, such as modifying parameters for re-submission.
+\end{itemize}
+
+
+In an omnichain web ecosystem, the settlement workflow is complex, involving multiple stages to ensure transaction correctness. Pre-confirmation ensures eligibility, while final confirmation guarantees execution. Rollback mechanisms and error handling ensure that any failures are managed gracefully, preserving the integrity of the entire system. This process ensures that transactions are efficient, secure, and verifiable across multiple chains.
+
