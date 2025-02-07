@@ -61,6 +61,7 @@ Mid-level solutions facilitate the coordination and management of cross-chain tr
 Comprehensive solutions are full-stack solutions designed to cover all aspects of cross-chain interoperability, including communication, liquidity, and more, while offering more extensive compatibility across ecosystems.
 
 \textbf{Arbitrum}: Arbitrum~\cite{arbitrum} is a Layer 2 scaling solution for Ethereum that leverages optimistic rollups to improve scalability and transaction throughput. While it is primarily focused on enhancing Ethereum's scalability, it has opened up a pathway for supporting Ethereum-compatible chains and applications, making it an important player in the broader Layer 2 ecosystem. Arbitrum's focus on Ethereum means that it is limited in its ability to facilitate cross-chain interoperability outside of the Ethereum ecosystem. Furthermore, with multiple rollups being developed for Ethereum, fragmentation within the Ethereum ecosystem could increase as more L2 solutions are deployed, each with their own interoperability protocols and standards.
+\\
 
 \textbf{Omni Network}: Omni Network~\cite{omni} offers cross-chain interoperability solutions at the Layer 2 level. It provides interoperability for various rollups and Layer 2 chains built on Ethereum. By using a robust messaging protocol, Omni Network can facilitate seamless interaction between different Ethereum-based Layer 2 solutions. Like many other Ethereum-centric solutions, Omni Network's focus remains limited to Ethereum-based ecosystems. As Ethereum rollups proliferate, the fragmentation of standards and protocols will complicate cross-chain interactions even further. Additionally, Omni's solution does not address interoperability with other Layer 1 ecosystems or new emerging ecosystems like Move-based networks.
 
@@ -77,6 +78,80 @@ One of the key challenges facing the development of cross-chain interoperability
 As each level is co-dependent on the one below, the compromise of a protocol at the foundational layer can cause cascading failures or reduced functionality across all other layers. To address this challenge, a comprehensive solution would need to work with multiple foundational protocols while mitigating the risks of fragmentation and ensuring strong cross-chain communication across all levels.
 
 In summary, the landscape of cross-chain interoperability solutions is diverse, with foundational, mid-level, and comprehensive solutions offering different levels of integration. However, with the emergence of new ecosystems and the rise of Move-based rollups, it is clear that the industry must adapt to these changes or face further fragmentation and siloing across the blockchain space.
+
+\subsection{Key Challenges in Intent Based System}
+
+The current cross-chain ecosystem faces several key challenges that hinder its efficiency, scalability, and decentralization~\cite{omnichain}. Below, we outline these issues and how our proposed system addresses them.
+
+\begin{itemize}
+    \item[1.] \textbf{Centralization Risks:} A significant concern in the existing intent-based cross-chain ecosystem is the scarcity of solvers available to execute user intents. This shortage leads to centralization, where a few entities dominate order flow, replicating issues seen in traditional finance. Becoming a solver often requires substantial resources, including staking requirements and sophisticated infrastructure, which creates high barriers to entry. For instance:
+    \begin{itemize}
+        \item 1inch Fusion mandates that solvers stake tokens to participate in auctions, which limits competition and favors larger entitie~\cite{lifi}. The top 10 solvers in 1inch Fusion receive the majority of order flow, with rankings based on stake size and duration, further discouraging smaller participants.
+        \item In UniswapX Beta, solvers must be whitelisted by the protocol, restricting open participation~\cite{lifi}.
+    \end{itemize}
+
+    Many intent-based bridges suffer from low competition—a significant percentage of auctions involve only one bidder, leading to suboptimal execution for users. This centralization risk compromises liveness, resistance to censorship, and execution efficiency, posing systemic risks to decentralized finance (DeFi).
+
+    \item[2.] \textbf{Settlement and Liquidity Fragmentation:} A major challenge solvers face is capital rebalancing across chains. When solvers execute cross-chain intents, they receive reimbursements from the originating chains, causing liquidity to spread across multiple Layer 1 (L1) and Layer 2 (L2) networks. This leads to:
+    
+    \begin{itemize}
+        \item Inefficiencies: Capital often remains idle, reducing the overall effectiveness of liquidity.
+        \item Higher operational complexity: Solvers must manually rebalance funds, increasing transaction costs and time delays.
+        \item Fragmented liquidity: Thinly spread liquidity weakens the ability of solvers to respond dynamically to cross-chain demand.
+    \end{itemize}
+
+    \item[3.] \textbf{Lack of Unified Capital Flow Management:} Each solver operates independently, managing liquidity in isolation. Without a shared coordination mechanism, solvers must rebalance capital manually, leading to: Duplicated efforts in liquidity management, higher costs and inefficiencies due to fragmented execution, and scalability limitations for cross-chain interoperability.
+
+    \item[4.] \textbf{Lack of User-Centric Applications:} Most cross-chain solutions today are infrastructure-focused, lacking an ecosystem that supports seamless user experiences. Developers struggle to build applications that abstract the complexities of interacting with multiple chains, making Web3 adoption difficult for everyday users.    
+\end{itemize}
+
+
+Projects like Across Protocol~\cite{across} and Cowswap~\cite{cowswap} attempt to solve some of these issues by standardizing cross-chain intents (ERC-7683~\cite{erc}) and enabling networks of independent solvers. However, these solutions are limited to Ethereum and do not extend to non-EVM chains, restricting their ability to address the broader interoperability challenge.
+
+\textbf{Our Solution: A Collaborative, Omni-Chain Solver Network}
+
+To overcome these limitations, we introduce a collaborative network of solvers deployed as omni-rollups. This approach enables decentralized, scalable, and efficient execution of cross-chain intents. The key components of our solution include:
+
+\begin{itemize}
+    \item[1.] \textbf{Standardization Layer for Cross-Chain Intents}
+
+    We extend ERC-7683 beyond Ethereum by creating a standardization layer that converts any L1-specific intent into a unified format. This involves:
+    \begin{itemize}
+        \item Defining a Cross-Chain Intent Schema (CCIS) to abstract execution details.
+        \item Using a common message format with parameters like: Intent Type (swap, bridge, lending, liquidation, etc.), Source  and Destination Chains, Assets and Amounts, and Execution Conditions (e.g., slippage tolerance, deadline, preferred routes).
+        \item Creating adapters for different L1s to translate native transactions into CCIS.
+    \end{itemize}
+
+    \item[2.] \textbf{Omni-Rollup Solver Network}
+
+    Our solvers operate as omni-rollups, functioning as a peer-to-peer network where solvers collaborate to execute complex intents efficiently. Each solver rollup maintains a shared state while interacting with L1 chains via smart contracts or directly to TSS enabled vault address for non-contract based chains.
+    Solvers can delegate parts of an intent to other solvers with specialized liquidity or execution capabilities. Anyone can deploy a solver rollup, ensuring a competitive and permissionless environment.
+
+    For example, if an intent lacks sufficient liquidity on a target chain, solvers dynamically source liquidity from other solvers in the network.
+
+    \item[3.] \textbf{Liquidity Management}
+
+    To address liquidity fragmentation, we introduce solver vaults on each L1 (controlled either through contract or dynamic TSS) that manage liquidity pools for efficient execution, communicate with solver rollup for execution instructions, and facilitate just-in-time settlement to optimize capital efficiency.
+
+    Cross-chain liquidity rebalances based on demand, ensuring minimized idle capital, efficient fund utilization across networks, and reduced manual overhead for solvers.
+
+    \item[4.] \textbf{Benefits of Our Model}
+
+    \begin{itemize}
+        \item Decentralized Solver Participation: Any participant can deploy an omni-rollup solver, preventing monopolization of order flow. Multiple solver rollups compete, ensuring optimal execution.
+
+        \item Improved Execution Efficiency: Solvers can process intents independently, reducing network congestion. Peer-to-peer solver collaboration allows for dynamic route optimization. Transactions are bundled and netted before settlement, lowering gas costs.
+
+        \item Optimized Liquidity and Settlement: Solvers leverage an omnichain liquidity network to settle transactions efficiently. Liquidity remains within the system and can be dynamically lent or borrowed. Netting mechanisms reduce the number of required transactions, lowering costs.
+
+        \item User-Centric Application Layer: Users submit intents without dealing with execution complexities. Gas fees are abstracted, allowing users to pay in a preferred token. Developers gain access to a seamless cross-chain framework for building dApps. The platform will support AI-driven agents, enabling automated, intelligent execution of cross-chain transactions and interactions.
+    \end{itemize}
+\end{itemize}
+
+
+Our collaborative solver network and standardized cross-chain intent layer solve fundamental issues in interoperability by:
+Decentralizing solver participation, optimizing execution and liquidity management, providing a unified infrastructure for cross-chain applications. Using Dojima's omni-chain architecture, we enable a scalable, secure, and decentralized cross-chain intent execution system that benefits solvers, developers, and users alike.
+
 
 \subsection{Overview of the Omnichain Web} % Add a subsection
 
