@@ -12,17 +12,16 @@ Beyond these dApp modules, developers can build customized solvers by merging fu
 
 By focusing on solver-driven execution, cross-chain interoperability, and a modular architecture, the Builder Marketplace empowers developers to create highly efficient and scalable solutions for decentralized applications. This ecosystem bridges the gap between disparate blockchain networks, offering a unified platform for seamless transaction execution and inter-chain communication.
 
-
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figure/solver.png}
+    \caption{Solver Illlustration}
+    \label{fig:solver}
+\end{figure}
 
 \subsubsection{Intent Standardization}
 
 To enable seamless cross-chain intent execution beyond Ethereum, ERC-7683 (Ethereum Cross-Chain Intent Standard) must be extended to support multiple Layer 1 (L1) chains. This requires a standardization layer that translates diverse intent formats from various chains into a unified standard intent format. The standard intent is then processed by a solver network, where each solver operates as an omni rollup and executes transactions across multiple L1s through chain-specific adapters.
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.9\linewidth]{figure/Intent.png}
-    \caption{Intent Standardization Illustration}
-    \label{fig:intent}
-\end{figure}
 
 \noindent
 \textbf{Standardization Layer for Cross-Chain Intents}
@@ -59,37 +58,17 @@ Each L1 maintains a solver contract that listens for execution instructions from
 
 Since each solver operates as an omni rollup, it serves as both an executor and liquidity provider. These solvers: Process standardized intents and optimize execution routes. Communicate with L1 adapters to ensure successful execution. Manage liquidity pools on L1s via smart contracts. Aggregate and batch transactions before settlement, reducing on-chain congestion.
 This ensures efficient execution of the intent across the chain, while also reducing gas costs by using Omnichain Web’s roll-up infrastructure.
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.9\linewidth]{figure/solver.png}
-    \caption{Solver Illlustration}
-    \label{fig:solver}
-\end{figure}
 
 \subsubsection{Solver Network}
 The Solver Network is a peer-to-peer collaborative network of omni-rollup solvers, each operating independently while cooperating dynamically to optimize intent execution. Each solver is deployed as an omnirollup, ensuring scalability, decentralization, and security. The network supports both simple and complex intents, leveraging netting mechanisms and liquidity rebalancing to enhance execution efficiency while minimizing capital lockup.
 
-Each solver runs its own Linera microchain~\cite{linera} based omni rollup, enabling independent processing of intents while maintaining full interoperability across the Solver Network. Each microchain consists of: Rust-based execution logic for handling transactions. Cross-chain address management to interact with various blockchains. Base API services for mempool scanning, netting, and solver coordination.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.9\linewidth]{figure/Netting.png}
-    \caption{Netting Process}
-    \label{fig:netting}
-\end{figure}
+Each solver runs its own Linera microchain based omni rollup, enabling independent processing of intents while maintaining full interoperability across the Solver Network. Each microchain consists of: Rust-based execution logic for handling transactions. Cross-chain address management to interact with various blockchains. Base API services for mempool scanning, netting, and solver coordination.
 
 \textbf{Peer-to-Peer Solver Collaboration and Netting System}
 
 Unlike traditional execution models that rely on direct liquidity consumption, the Solver Network first attempts to net out user intents before executing them on-chain. This is achieved by matching complementary intents in a shared mempool, reducing the reliance on external liquidity. For example: If User A submits an intent to swap ETH → USDC, and User B submits an intent to swap USDC → ETH, solvers can net these transactions out internally, allowing A and B to swap without affecting liquidity reserves. More complex intents—such as multi-hop swaps, cross-chain arbitrage, and lending liquidations—can be batched into netted sets where one set of transactions offsets the other. Each netted batch is designed to minimize slippage, reduce gas fees, and optimize execution.
 
 Solvers continuously scan the mempool to find optimal netting opportunities, ensuring that user intents are fulfilled with minimal external liquidity impact. If netting is not possible, solvers proceed with direct execution using their available liquidity or by coordinating with other solvers.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.9\linewidth]{figure/Rebalancing.png}
-    \caption{Rebalancing Illustration}
-    \label{fig:rebalancing}
-\end{figure}
 
 \textbf{Liquidity Rebalancing Through Intent Generation}
 
@@ -98,6 +77,23 @@ Solvers manage their own liquidity across multiple chains, but maintaining balan
 Example scenario: Solver X (Ethereum) has excess liquidity on Solana but wants to move it back to Ethereum. Solver Y (Solana) has excess liquidity in Ethereum and wants to move it to Solana.
 Instead of using bridges or external liquidity providers, Solver X and Solver Y fulfill each other's rebalancing intents, ensuring that both solvers retain liquidity within their own systems. This decentralized liquidity rebalancing mechanism improves capital efficiency, prevents unnecessary fragmentation, and reduces reliance on traditional liquidity bridges, which are prone to delays and security risks.
 
+\textbf{Solver Collaboration}
+
+
+In the solver network, multiple solvers can collaborate to fulfill complex user intents, enabling efficient and composable service execution. To ensure speed, trust, and coordination, solvers are connected through a unified contract, which acts as a global ledger for local state synchronization. Each solver maintains a cross balance tree, a Merkle tree structure that records the balances of tokens held by other solvers from its perspective. For example, in Solver A’s cross balance tree, each leaf node represents a specific token balance attributed to another solver (e.g., Solver B or C). This structure enables accurate and auditable tracking of inter-solver balances.
+
+To preserve the integrity of the system, solvers can only transfer assets from their local balance trees if they actually own those tokens. This rule ensures that no solver can arbitrarily mint or assign value to another solver, thereby maintaining the security and fairness of asset distribution across the network. Every time a solver updates its local balance tree, such as after transferring tokens to another solver, the updated Merkle root is pushed to the unified contract. This shared contract keeps a record of all local Merkle roots, allowing other solvers to verify state transitions using Merkle proofs.
+
+\begin{figure}[h]
+    \centering
+    \fbox{\includegraphics[width=0.9\linewidth]{figure/solver_settlement.png}}
+    \caption{Solver Collaboration and Settlement}
+    \label{fig:solversettlement}
+\end{figure}
+
+Consider a user request that requires the cooperation of three solvers: Solver A, Solver B, and Solver C. The user deposits funds to Solver A, which then updates its local balance tree to reflect a token transfer to Solver B. Solver A pushes the updated Merkle root to the unified contract and provides a Merkle proof of this transfer to Solver B. Solver B verifies the authenticity of the update by checking the Merkle proof against the root stored in the unified contract. Once verified, Solver B performs its assigned task, then transfers the required tokens to Solver C in a similar manner, updating its local balance tree, pushing the new root to the unified contract, and sharing the Merkle proof with Solver C.
+
+Upon verifying the proof, Solver C finalizes the process by executing its portion of the user’s request and releasing the final assets to the user’s destination address using Hermes at Ragno Network. This handoff ensures that users receive their output through a decentralized and secure channel. Later, Solver C can claim its balance from Solver B by submitting a withdrawal request. Solver B will process this request via Hermes, transferring the assets and adjusting its local balance tree accordingly. The same process applies for Solver B to claim its balance from Solver A, creating a fully auditable, decentralized flow of assets across the solver network.
 
 
 \subsubsection{Transaction Flow}
